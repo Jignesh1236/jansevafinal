@@ -1818,7 +1818,7 @@ const AdminPage: React.FC = () => {
                     <option value="">All Types</option>
                     <option value="profit">Profitable</option>
                     <option value="loss">Loss Making</option>
-                    <option value="high-income">High Income (>₹5000)</option>
+                    <option value="high-income">High Income (₹5000)</option>
                   </select>
                 </div>
               </div>
