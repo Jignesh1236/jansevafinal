@@ -133,21 +133,86 @@ const ViewReportsPage: React.FC = () => {
   };
 
   const downloadReport = (report: Report) => {
-    const reportData = {
-      ...report,
-      netAmount: calculateNetAmount(report),
-      generatedAt: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(reportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `report-${report.id.slice(0, 8)}-${new Date(report.timestamp).toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    try {
+      const csvData = [
+        ["Section", "Item", "Amount", "Remark"],
+        // Income Section
+        ...(report.income || []).map((item) => [
+          "Income",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // Deposit Section
+        ...(report.deposit || []).map((item) => [
+          "Deposit",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // Stamp Section
+        ...(report.stamp || []).map((item) => [
+          "Stamp",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // Balance Section
+        ...(report.balance || []).map((item) => [
+          "Balance",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // MGVCL Section
+        ...(report.mgvcl || []).map((item) => [
+          "MGVCL",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // Expenses Section
+        ...(report.expences || []).map((item) => [
+          "Expenses",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // Online Payment Section
+        ...(report.onlinePayment || []).map((item) => [
+          "Online Payment",
+          item.name || "",
+          item.amount || 0,
+          item.remark || "",
+        ]),
+        // Summary
+        ["", "", "", ""],
+        ["Summary", "", "", ""],
+        ["Income Total", "", report.totals?.income || 0, ""],
+        ["Deposit Total", "", report.totals?.deposit || 0, ""],
+        ["Stamp Total", "", report.totals?.stamp || 0, ""],
+        ["Balance Total", "", report.totals?.balance || 0, ""],
+        ["MGVCL Total", "", report.totals?.mgvcl || 0, ""],
+        ["Online Payment Total", "", report.totals?.onlinePayment || 0, ""],
+        ["Expenses Total", "", report.totals?.expences || 0, ""],
+        ["Net Amount", "", calculateNetAmount(report), ""],
+      ];
+
+      const csvContent = csvData
+        .map((row) => row.map((field) => `"${String(field).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+      const dataUri = "data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent(csvContent);
+
+      const exportFileDefaultName = `report-${report.id.slice(0, 8)}-${new Date(report.timestamp).toISOString().split('T')[0]}.csv`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      alert("Error exporting report as Excel/CSV");
+    }
   };
 
   const printReport = (report: Report) => {
